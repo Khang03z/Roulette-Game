@@ -15,11 +15,12 @@ contract BetManager {
     // Các biến công khai
     PlayerManager public playerManager;
     address public owner;  // Chủ sở hữu hợp đồng
-    uint256 public currentIDgame;  // ID game hiện tại
+    uint256 public currentIDgame = 1;  // ID game bắt đầu từ 1
     
     // Các mapping để lưu trữ cược và kết quả của các game
     mapping(uint256 => Bet[]) public bets;  // Lưu trữ các cược của từng game theo ID (mảng Bet)
     mapping(uint256 => uint8) public results; // Lưu trữ kết quả của từng game
+    mapping(uint256 => address[]) public playerList;  // Lưu trữ danh sách người chơi cho mỗi game
 
     // Sự kiện khi người chơi đặt cược và khi kết quả được tạo ra
     event BetPlaced(address indexed player, uint256 amount, uint8 betType, uint256 betValue);
@@ -57,12 +58,6 @@ contract BetManager {
             require(betValue >= 0 && betValue <= 36, "Invalid number. Choose a number between 0 and 36.");
         }
 
-        // Tăng ID game
-        currentIDgame++;
-
-        // Giảm số dư của người chơi khi đặt cược
-        playerManager.decreaseBalance(msg.sender, msg.value);
-
         // Cập nhật thông tin cược của người chơi cho game hiện tại
         bets[currentIDgame].push(Bet({
             player: msg.sender,
@@ -71,6 +66,11 @@ contract BetManager {
             betValue: betValue
         }));
 
+        // Thêm người chơi vào danh sách của game
+        playerList[currentIDgame].push(msg.sender);
+        
+        // Giảm số dư của người chơi khi đặt cược
+        playerManager.decreaseBalance(msg.sender, msg.value);
         // Phát sự kiện BetPlaced
         emit BetPlaced(msg.sender, msg.value, betType, betValue);
     }
@@ -89,6 +89,11 @@ contract BetManager {
     // Hàm getter trả về các cược của một game cụ thể
     function getBets(uint256 gameID) external view returns (Bet[] memory) {
         return bets[gameID];
+    }
+
+    // Hàm getter trả về danh sách người chơi của một game
+    function getPlayers(uint256 gameID) external view returns (address[] memory) {
+        return playerList[gameID];
     }
 
     // Hàm quay vòng quay
