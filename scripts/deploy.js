@@ -19,7 +19,7 @@ async function main() {
   const BetManager = await ethers.getContractFactory("BetManager");
   const betManager = await BetManager.deploy(playerManager.target); // Truyền địa chỉ PlayerManager
   await betManager.waitForDeployment(); // Đảm bảo hợp đồng đã được triển khai
-  console.log("BetManager deployed to:", betManager.target);
+  console.log("BettManager deployed to:", betManager.target);
 
   // Deploy RewardManager
   const RewardManager = await ethers.getContractFactory("RewardManager");
