@@ -52,7 +52,7 @@ npx hardhat
 
 Lệnh trên sẽ giúp bạn thiết lập Hardhat trong dự án của mình. 
 
-4. Cấu hình Mạng Local: Để chạy Hardhat trên mạng local, bạn có thể khởi động Hardhat Network bằng cách chạy lệnh sau: 
+4. Cấu hình Mạng Local: Để chạy Hardhat trên mạng local, bạn có thể khởi động Hardhat Network bằng cách chạy lệnh:
 
 ``` bash
 npx hardhat node
