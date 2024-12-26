@@ -24,7 +24,7 @@ contract RewardManager {
 
     function distributeRewards(uint256 gameID) external onlyOwner {
         uint8 result = betManager.results(gameID);
-        require(result >= 0 && result <= 36, "Invalid result for the game.");
+        require(result >= 0 && result <= 36, "Invalid result for the game");
 
         BetManager.Bet[] memory gameBets = betManager.getBets(gameID);
 
