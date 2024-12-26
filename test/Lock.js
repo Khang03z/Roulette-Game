@@ -48,7 +48,7 @@ describe("Lock", function () {
       );
     });
 
-    it("Should fail if the unlockTime is not in the future", async function () {
+    it("Should fail if the unlockTime is not in future", async function () {
       // We don't use the fixture here because we want a different deployment
       const latestTime = await time.latest();
       const Lock = await ethers.getContractFactory("Lock");
