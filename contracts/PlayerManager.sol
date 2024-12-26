@@ -23,14 +23,13 @@ contract PlayerManager {
 
     // Modifier cho phép chỉ chủ sở hữu thực thi các hàm
     modifier onlyOwner() {
-        require(msg.sender == owner, "Only owner can set the result");
+        require(msg.sender == owner, "Only the owner can set the result");
         _;
     }
 
     // Hàm đăng ký người chơi mới
     function registerPlayer() external {
         require(!players[msg.sender].isRegistered, "Player is already registered.");
-
         // Lưu thông tin người chơi mới vào mapping
         players[msg.sender] = Player({
             wallet: msg.sender,
@@ -62,11 +61,12 @@ contract PlayerManager {
     }
 
     // Hàm lấy số dư của người chơi
-    function getBalance() external view returns (uint256) {
-        require(players[msg.sender].isRegistered, "Player is not registered.");
-        
-        return players[msg.sender].balance;
+    function getBalance(address player) external view returns (uint256) {
+        require(players[player].isRegistered, "Player is not registered.");
+    
+        return players[player].balance;
     }
+
 
     // Hàm kiểm tra người chơi đã đăng ký chưa
     function checkIsRegistered(address playerAddress) external view returns (bool) {
@@ -92,6 +92,7 @@ contract PlayerManager {
 
         emit BalanceUpdated(msg.sender, players[msg.sender].balance);
     }
+
     receive() external payable{}
     fallback() external payable{}
 
