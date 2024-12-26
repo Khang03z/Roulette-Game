@@ -27,7 +27,7 @@ contract BetManager {
 
     // Modifier chỉ cho phép chủ sở hữu thực thi
     modifier onlyOwner() {
-        require(msg.sender == owner, "Only the owner can set the result");
+        require(msg.sender == owner, "Only the owner can set result");
         _;
     }
 
