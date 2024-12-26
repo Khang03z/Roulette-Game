@@ -39,13 +39,13 @@ contract BetManager {
     }
 
     // Hàm đặt cược
-    function placeBet(uint8 betType, uint256 betValue) external payable {
+    function placeBet(uint8 betType, uint256 betValue, uint256 betAmount) external {
         // Kiểm tra nếu người chơi đã đăng ký
         bool isRegistered = playerManager.checkIsRegistered(msg.sender);
         require(isRegistered, "Player is not registered.");
 
         // Kiểm tra số tiền cược phải lớn hơn 0
-        require(msg.value > 0, "Bet amount must be greater than zero.");
+        require(betAmount > 0, "Bet amount must be greater than zero.");
 
         // Kiểm tra tính hợp lệ của lựa chọn (betValue) tùy theo betType
         if (betType == 1) {  // Cược chẵn/lẻ
@@ -58,10 +58,15 @@ contract BetManager {
             require(betValue >= 0 && betValue <= 36, "Invalid number. Choose a number between 0 and 36.");
         }
 
+
+        // Kiểm tra số dư của người chơi trong PlayerManager trước khi đặt cược
+        uint256 playerBalance = playerManager.getBalance(msg.sender);
+        require(playerBalance >= betAmount, "Insufficient balance.");
+
         // Cập nhật thông tin cược của người chơi cho game hiện tại
         bets[currentIDgame].push(Bet({
             player: msg.sender,
-            amount: msg.value,
+            amount: betAmount,
             betType: betType,
             betValue: betValue
         }));
@@ -70,9 +75,9 @@ contract BetManager {
         playerList[currentIDgame].push(msg.sender);
         
         // Giảm số dư của người chơi khi đặt cược
-        playerManager.decreaseBalance(msg.sender, msg.value);
+        playerManager.decreaseBalance(msg.sender, betAmount);
         // Phát sự kiện BetPlaced
-        emit BetPlaced(msg.sender, msg.value, betType, betValue);
+        emit BetPlaced(msg.sender,betAmount, betType, betValue);
     }
 
     // Hàm truy vấn thông tin cược của người chơi cho một game cụ thể

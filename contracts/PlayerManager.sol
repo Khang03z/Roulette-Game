@@ -27,6 +27,10 @@ contract PlayerManager {
         _;
     }
 
+    constructor()
+    {
+        owner = msg.sender;
+    }
     // Hàm đăng ký người chơi mới
     function registerPlayer() external {
         require(!players[msg.sender].isRegistered, "Player is already registered.");
