@@ -23,7 +23,7 @@ contract PlayerManager {
 
     // Modifier cho phép chỉ chủ sở hữu thực thi các hàm
     modifier onlyOwner() {
-        require(msg.sender == owner, "Only the owner can set the result");
+        require(msg.sender == owner, "Only owner can set the result");
         _;
     }
 
