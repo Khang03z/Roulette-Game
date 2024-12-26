@@ -5,7 +5,7 @@ module.exports = {
   solidity: "0.8.18",
   networks: {
     sepolia: {
-      url: "https://sepolia.infura.io/v3/a7e37d1584a14dd792994387a2cc359",
+      url: "https://sepolia.infura.io/v3/a7e37d1584a14dd792994387a2cc359b",
     },
   },
 };
