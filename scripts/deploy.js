@@ -27,13 +27,7 @@ async function main() {
   await rewardManager.waitForDeployment(); // Đảm bảo hợp đồng đã được triển khai
   console.log("RewardManager deployed to:", rewardManager.target);
 
-  // Gọi hàm owner() để kiểm tra chủ sở hữu
-  const ownerPlayerManager = await PlayerManager.owner();
-  const ownerRewardManager = await rewardManager.owner();
-  const ownerBetManager = await betManager.owner();
 
-  console.log("RewardManager Owner Address:", ownerRewardManager);
-  console.log("BetManager Owner Address:", ownerBetManager);
 }
 
 main().catch((error) => {
