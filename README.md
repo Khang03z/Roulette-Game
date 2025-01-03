@@ -1,68 +1,71 @@
-# Roulette Game - Smart Contract Project
+Hướng Dẫn Test Smart Contract trên Remix IDE
+1. Giới thiệu
+Trong hướng dẫn này, chúng ta sẽ kiểm tra hai smart contract của bạn: PlayerManager và BetManager. Các chức năng của chúng sẽ được mô tả chi tiết để bạn có thể kiểm tra chúng dễ dàng trên Remix IDE.
 
-## Giới thiệu
+2. Các chức năng của PlayerManager Contract
+Smart contract PlayerManager quản lý các chức năng liên quan đến người chơi như đăng ký, nạp tiền, rút tiền, và kiểm tra số dư của người chơi.
 
-Dự án này là một trò chơi Roulette được triển khai bằng hợp đồng thông minh trên Ethereum. Bạn sẽ tìm thấy mã nguồn hợp đồng thông minh Solidity trong thư mục này. Dưới đây là hướng dẫn để bạn có thể clone code về và triển khai Hardhat để làm việc với nó.
+Hàm: registerPlayer()
+Mô tả: Hàm này cho phép người chơi đăng ký tài khoản trong hệ thống.
+Cách kiểm tra:
+Mở Remix IDE, vào tab "Solidity Compiler" và biên dịch PlayerManager.sol.
+Vào tab "Deploy & Run Transactions" và chọn PlayerManager.
+Trong phần "Deployed Contracts", nhấn vào registerPlayer().
+Gửi giao dịch và kiểm tra nếu người chơi đã được đăng ký thành công.
+Hàm: deposit()
+Mô tả: Hàm này cho phép người chơi nạp tiền vào tài khoản của mình.
+Cách kiểm tra:
+Sau khi người chơi đã đăng ký, sử dụng deposit() để nạp tiền vào tài khoản.
+Chọn deposit() và nhập số tiền cần nạp.
+Nhấn "Transact" và xác nhận giao dịch.
+Hàm: withdrawBalance(uint256 amount)
+Mô tả: Cho phép người chơi rút một số tiền nhất định từ tài khoản của mình.
+Cách kiểm tra:
+Sau khi người chơi đã nạp tiền, sử dụng withdrawBalance() để rút tiền.
+Nhập số tiền muốn rút và gửi giao dịch.
+Hàm: getBalance(address player)
+Mô tả: Hàm này trả về số dư của một người chơi cụ thể.
+Cách kiểm tra:
+Nhập địa chỉ của người chơi vào trường player.
+Chọn getBalance và nhấn "Call" để xem số dư của người chơi.
+3. Các chức năng của BetManager Contract
+Smart contract BetManager quản lý các cược của người chơi, tính toán kết quả và phân phối tiền thưởng.
 
-## Yêu cầu
+Hàm: placeBet(uint8 betType, uint256 betValue, uint256 betAmount)
+Mô tả: Người chơi có thể đặt cược vào trò chơi, chỉ định loại cược (betType), giá trị cược (betValue), và số tiền cược (betAmount).
+Cách kiểm tra:
+Trong Remix, sau khi triển khai contract, nhập loại cược (betType), giá trị cược (betValue), và số tiền cược (betAmount).
+Nhấn vào placeBet và xác nhận giao dịch.
+Kiểm tra nếu cược đã được ghi nhận trong hệ thống.
+Hàm: spinWheel()
+Mô tả: Chủ sở hữu có thể quay bánh xe để tạo ra một kết quả ngẫu nhiên.
+Cách kiểm tra:
+Chỉ chủ sở hữu mới có quyền sử dụng hàm này.
+Chủ sở hữu gọi hàm spinWheel() để quay bánh xe và tạo kết quả.
+Kiểm tra kết quả của vòng quay qua sự kiện ResultGenerated.
+Hàm: distributeWinnings(uint256 gameID, uint8 result)
+Mô tả: Sau khi có kết quả của trò chơi, hàm này sẽ phân phối tiền thưởng cho người chơi dựa trên kết quả cược của họ.
+Cách kiểm tra:
+Sau khi quay bánh xe, hàm này sẽ tự động được gọi để phân phối tiền thưởng cho người chơi.
+Kiểm tra các sự kiện WinningsDistributed để xác nhận tiền thưởng đã được phân phối.
+Hàm: getPlayers(uint256 gameID)
+Mô tả: Trả về danh sách người chơi tham gia vào một trò chơi cụ thể.
+Cách kiểm tra:
+Nhập gameID vào trường và nhấn "Call" để nhận danh sách người chơi.
+4. Kiểm tra bằng Remix IDE
+Mở Remix IDE:
 
-Trước khi bắt đầu, bạn cần cài đặt một số công cụ sau:
+Truy cập Remix IDE.
+Vào tab "Solidity Compiler", chọn phiên bản Solidity phù hợp, và biên dịch các contract của bạn (PlayerManager.sol, BetManager.sol).
+Triển khai Contract:
 
-1. **Node.js**: Bạn cần Node.js để chạy Hardhat và các package liên quan.
-   - Tải và cài đặt Node.js từ [Node.js Official Website](https://nodejs.org/).
-   
-2. **npm hoặc yarn**: npm là công cụ quản lý gói đi kèm với Node.js, hoặc bạn có thể cài đặt yarn.
-   - Cài đặt npm thông qua Node.js.
+Chuyển đến tab "Deploy & Run Transactions".
+Chọn PlayerManager và BetManager trong danh sách contract đã biên dịch và nhấn "Deploy".
+Gửi Giao Dịch:
 
+Sau khi triển khai contract, bạn sẽ thấy chúng dưới mục "Deployed Contracts".
+Các hàm sẽ hiển thị dưới các contract đã triển khai.
+Bạn có thể tương tác với các hàm như placeBet, deposit, withdrawBalance, v.v.
+Xem Các Sự Kiện:
 
-3. **Git**: Để clone repository từ GitHub.
-   - Tải và cài đặt Git từ [Git Official Website](https://git-scm.com/).
-
-4. **Hardhat**: Đây là framework để phát triển hợp đồng thông minh trên Ethereum.
-   - Hardhat sẽ được cài đặt trong dự án của bạn.
-
-## Các bước triển khai
-
-### 1. Clone Repository
-
-Đầu tiên, clone repository về máy tính của bạn:
-
-```bash
-git clone https://github.com/Khang03z/Roulette-Game.git
-
-cd Roulette-Game
-
-```
-
-2. Cài đặt các phụ thuộc
-
-Trong thư mục dự án, chạy lệnh sau để cài đặt các phụ thuộc cần thiết (bao gồm cả Hardhat): 
-
-```bash
-npm install
-
-```
-
-3. Cài đặt Hardhat
-Nếu chưa cài đặt Hardhat, bạn có thể cài đặt nó bằng cách chạy lệnh: 
-
-``` bash
-npx hardhat
-```
-
-Lệnh trên sẽ giúp bạn thiết lập Hardhat trong dự án của mình. 
-
-4. Cấu hình Mạng Local: Để chạy Hardhat trên mạng local, bạn có thể khởi động Hardhat Network bằng cách chạy lệnh:
-
-``` bash
-npx hardhat node
-```
-
-Điều này sẽ bắt đầu một mạng blockchain local, và bạn có thể triển khai các hợp đồng lên đó.
-
-Sau đó có thể triển khai hợp đồng bằng cách chạy lệnh: 
-``` bash
-npx hardhat run scripts/deploy.js --network localhost
-```
-
-=> Triển khai thành công 3 contract ở local. 
+Các sự kiện như BetPlaced, ResultGenerated, WinningsDistributed sẽ được hiển thị trong phần "Logs" dưới mỗi giao dịch. Đây là nơi bạn có thể kiểm tra kết quả các hành động đã thực hiện.
