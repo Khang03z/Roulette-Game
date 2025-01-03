@@ -1,81 +1,114 @@
-Hướng Dẫn Test Smart Contract trên Remix IDE
-1. Giới thiệu
-Trong hướng dẫn này, chúng ta sẽ kiểm tra hai smart contract của bạn: PlayerManager và BetManager. Các chức năng của chúng sẽ được mô tả chi tiết để bạn có thể kiểm tra chúng dễ dàng trên Remix IDE.
+# Hướng Dẫn Kiểm Tra Các Smart Contract: PlayerManager & BetManager
 
-2. Các chức năng của PlayerManager Contract
-Smart contract PlayerManager quản lý các chức năng liên quan đến người chơi như đăng ký, nạp tiền, rút tiền, và kiểm tra số dư của người chơi.
+Chào mừng bạn đến với hướng dẫn kiểm tra hai smart contract **PlayerManager** và **BetManager**! Trong hướng dẫn này, chúng ta sẽ đi qua từng chức năng của các smart contract, từ việc đăng ký người chơi cho đến việc đặt cược và quay bánh xe. Hãy cùng khám phá các tính năng mạnh mẽ này và kiểm tra chúng trên **Remix IDE**.
 
-Hàm: registerPlayer()
-Mô tả: Hàm này cho phép người chơi đăng ký tài khoản trong hệ thống.
-- Cách kiểm tra:
-Mở Remix IDE, vào tab "Solidity Compiler" và biên dịch PlayerManager.sol.
-Vào tab "Deploy & Run Transactions" và chọn PlayerManager.
-Trong phần "Deployed Contracts", nhấn vào registerPlayer().
-Gửi giao dịch và kiểm tra nếu người chơi đã được đăng ký thành công.
+---
 
-Hàm: deposit()
-Mô tả: Hàm này cho phép người chơi nạp tiền vào tài khoản của mình.
-- Cách kiểm tra:
-Sau khi người chơi đã đăng ký, sử dụng deposit() để nạp tiền vào tài khoản.
-Chọn deposit() và nhập số tiền cần nạp.
-Nhấn "Transact" và xác nhận giao dịch.
+## 🚀 Giới Thiệu
 
-Hàm: withdrawBalance(uint256 amount)
-Mô tả: Cho phép người chơi rút một số tiền nhất định từ tài khoản của mình.
-- Cách kiểm tra:
-Sau khi người chơi đã nạp tiền, sử dụng withdrawBalance() để rút tiền.
-Nhập số tiền muốn rút và gửi giao dịch.
+### **PlayerManager Contract**:
+Đây là contract chịu trách nhiệm quản lý các người chơi trong hệ thống. Các chức năng của nó bao gồm:
+- Đăng ký người chơi
+- Nạp và rút tiền cho người chơi
+- Kiểm tra số dư của người chơi
 
-Hàm: getBalance(address player)
-Mô tả: Hàm này trả về số dư của một người chơi cụ thể.
--Cách kiểm tra:
-Nhập địa chỉ của người chơi vào trường player.
-Chọn getBalance và nhấn "Call" để xem số dư của người chơi.
+### **BetManager Contract**:
+BetManager giúp quản lý quá trình đặt cược, quay bánh xe và phân phối phần thưởng cho người chơi dựa trên kết quả của trò chơi. Các chức năng chính:
+- Đặt cược vào trò chơi
+- Quay bánh xe với kết quả ngẫu nhiên
+- Phân phối phần thưởng sau khi có kết quả
 
+---
 
-3. Các chức năng của BetManager Contract
-Smart contract BetManager quản lý các cược của người chơi, tính toán kết quả và phân phối tiền thưởng.
+## 🔧 Cài Đặt và Triển Khai
 
-Hàm: placeBet(uint8 betType, uint256 betValue, uint256 betAmount)
-Mô tả: Người chơi có thể đặt cược vào trò chơi, chỉ định loại cược (betType), giá trị cược (betValue), và số tiền cược (betAmount).
-- Cách kiểm tra:
+### Bước 1: Truy Cập Remix IDE
+Mở **[Remix IDE](https://remix.ethereum.org/)**, một công cụ phát triển mạnh mẽ cho việc viết, biên dịch và triển khai smart contract.
 
-Trong Remix, sau khi triển khai contract, nhập loại cược (betType), giá trị cược (betValue), và số tiền cược (betAmount).
-Nhấn vào placeBet và xác nhận giao dịch.
-Kiểm tra nếu cược đã được ghi nhận trong hệ thống.
+### Bước 2: Biên Dịch Các Smart Contract
+1. **Chuyển đến tab Solidity Compiler**.
+2. Tải lên các tệp smart contract của bạn: `PlayerManager.sol` và `BetManager.sol`.
+3. Chọn phiên bản Solidity phù hợp và nhấn "Compile" để biên dịch các contract.
 
-Hàm: spinWheel()
-Mô tả: Chủ sở hữu có thể quay bánh xe để tạo ra một kết quả ngẫu nhiên.
-- Cách kiểm tra:
-Chỉ chủ sở hữu mới có quyền sử dụng hàm này.
-Chủ sở hữu gọi hàm spinWheel() để quay bánh xe và tạo kết quả.
-Kiểm tra kết quả của vòng quay qua sự kiện ResultGenerated.
+### Bước 3: Triển Khai Contract
+1. Chuyển đến tab **Deploy & Run Transactions**.
+2. Chọn contract bạn muốn triển khai, bắt đầu với **PlayerManager** và nhấn "Deploy".
+3. Tiếp tục triển khai **BetManager**.
 
-Hàm: distributeWinnings(uint256 gameID, uint8 result)
-Mô tả: Sau khi có kết quả của trò chơi, hàm này sẽ phân phối tiền thưởng cho người chơi dựa trên kết quả cược của họ.
-- Cách kiểm tra:
-Sau khi quay bánh xe, hàm này sẽ tự động được gọi để phân phối tiền thưởng cho người chơi.
-Kiểm tra các sự kiện WinningsDistributed để xác nhận tiền thưởng đã được phân phối.
+---
 
-Hàm: getPlayers(uint256 gameID)
-Mô tả: Trả về danh sách người chơi tham gia vào một trò chơi cụ thể.
-- Cách kiểm tra:
-Nhập gameID vào trường và nhấn "Call" để nhận danh sách người chơi.
+## 🛠️ Các Chức Năng và Cách Kiểm Tra
 
-4. Kiểm tra bằng Remix IDE
-Mở Remix IDE:
+### 1. **PlayerManager Contract**
 
-Truy cập Remix IDE.
-Vào tab "Solidity Compiler", chọn phiên bản Solidity phù hợp, và biên dịch các contract của bạn (PlayerManager.sol, BetManager.sol).
-Triển khai Contract:
+#### **📋 `registerPlayer()`**
+- **Mô tả**: Cho phép người chơi đăng ký tài khoản.
+- **Cách kiểm tra**: 
+  - Sau khi triển khai contract, nhấn vào `registerPlayer()`.
+  - Xác nhận giao dịch và kiểm tra tài khoản người chơi mới đã được đăng ký thành công.
 
-Chuyển đến tab "Deploy & Run Transactions".
-Chọn PlayerManager và BetManager trong danh sách contract đã biên dịch và nhấn "Deploy".
-Gửi Giao Dịch:
+#### **💰 `deposit()`**
+- **Mô tả**: Nạp tiền vào tài khoản người chơi.
+- **Cách kiểm tra**:
+  - Sau khi đăng ký, người chơi có thể sử dụng `deposit()` để nạp tiền vào tài khoản của mình.
+  - Chọn `deposit()` và nhập số tiền nạp vào. Nhấn "Transact" để gửi giao dịch.
 
-Sau khi triển khai contract, bạn sẽ thấy chúng dưới mục "Deployed Contracts".
-Các hàm sẽ hiển thị dưới các contract đã triển khai.
-Bạn có thể tương tác với các hàm như placeBet, deposit, withdrawBalance, v.v.
-Xem Các Sự Kiện:
+#### **💸 `withdrawBalance(uint256 amount)`**
+- **Mô tả**: Cho phép người chơi rút tiền khỏi tài khoản.
+- **Cách kiểm tra**:
+  - Sau khi đã nạp tiền, sử dụng `withdrawBalance()` để rút tiền.
+  - Nhập số tiền cần rút và gửi giao dịch.
 
-Các sự kiện như BetPlaced, ResultGenerated, WinningsDistributed sẽ được hiển thị trong phần "Logs" dưới mỗi giao dịch. Đây là nơi bạn có thể kiểm tra kết quả các hành động đã thực hiện.
+#### **🔍 `getBalance(address player)`**
+- **Mô tả**: Trả về số dư tài khoản của người chơi.
+- **Cách kiểm tra**:
+  - Nhập địa chỉ ví của người chơi vào ô `player` và nhấn "Call" để xem số dư.
+
+### 2. **BetManager Contract**
+
+#### **🎲 `placeBet(uint8 betType, uint256 betValue, uint256 betAmount)`**
+- **Mô tả**: Đặt cược vào một trò chơi với các tham số `betType`, `betValue` và `betAmount`.
+- **Cách kiểm tra**:
+  - Nhập loại cược (`betType`), giá trị cược (`betValue`), và số tiền cược (`betAmount`).
+  - Nhấn "Transact" để gửi giao dịch và kiểm tra xem cược đã được ghi nhận trong hệ thống.
+
+#### **🎡 `spinWheel()`**
+- **Mô tả**: Quay bánh xe để tạo ra một kết quả ngẫu nhiên.
+- **Cách kiểm tra**:
+  - Chủ sở hữu có quyền gọi hàm này để quay bánh xe.
+  - Nhấn vào `spinWheel()` và kiểm tra kết quả qua sự kiện `ResultGenerated`.
+
+#### **🏆 `distributeWinnings(uint256 gameID, uint8 result)`**
+- **Mô tả**: Phân phối tiền thưởng cho người chơi sau khi có kết quả.
+- **Cách kiểm tra**:
+  - Sau khi quay bánh xe, hàm này tự động phân phối phần thưởng cho người chơi.
+  - Kiểm tra các sự kiện `WinningsDistributed` để xác nhận tiền thưởng đã được phân phối.
+
+#### **👥 `getPlayers(uint256 gameID)`**
+- **Mô tả**: Trả về danh sách người chơi tham gia trò chơi có `gameID`.
+- **Cách kiểm tra**:
+  - Nhập `gameID` vào trường và nhấn "Call" để xem danh sách người chơi tham gia.
+
+---
+
+## 🔥 Kiểm Tra Sự Kiện
+Các sự kiện quan trọng sẽ được phát sinh trong quá trình thực hiện các hành động. Bạn có thể xem kết quả trong phần **Logs** của Remix IDE:
+- `BetPlaced`: Khi người chơi đặt cược.
+- `ResultGenerated`: Khi kết quả của vòng quay được tạo ra.
+- `WinningsDistributed`: Khi phần thưởng được phân phối cho người chơi.
+
+---
+
+## 📈 Kết Quả Kiểm Tra
+Sau khi thực hiện các hành động, bạn có thể kiểm tra kết quả thông qua:
+1. **Biểu đồ giao dịch** trong Remix IDE.
+2. **Sự kiện Logs** để theo dõi các sự kiện như cược đã được đặt, kết quả đã được tạo, và tiền thưởng đã được phân phối.
+
+---
+
+## 📜 Kết Luận
+Giờ đây, bạn có thể dễ dàng kiểm tra và tương tác với các smart contract **PlayerManager** và **BetManager** của mình! Hãy thử nghiệm các tính năng như đăng ký người chơi, nạp tiền, đặt cược, và phân phối phần thưởng thông qua Remix IDE.
+
+Chúc bạn thành công và khám phá thế giới DeFi một cách dễ dàng và thú vị!
+
+---
