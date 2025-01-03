@@ -1,69 +1,58 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./PlayerManager.sol";  // Giả sử bạn đã có contract PlayerManager
+import "./PlayerManager.sol"; // Giả sử bạn đã có contract PlayerManager
 
 contract BetManager {
-    // Cấu trúc lưu trữ thông tin về mỗi cược
     struct Bet {
-        address player;      // Địa chỉ người chơi
-        uint256 amount;      // Số tiền cược
-        uint8 betType;       // Loại cược (1: Chẵn, lẻ, 2: Đen, đỏ, 3: 1st12, 2nd12, 3rd12, 4: số)
-        uint256 betValue;    // Giá trị cược (Số nếu betType là số)
+        address player;
+        uint256 amount;
+        uint8 betType;
+        uint256 betValue;
     }
 
-    // Các biến công khai
     PlayerManager public playerManager;
-    address public owner;  // Chủ sở hữu hợp đồng
-    uint256 public currentIDgame = 1;  // ID game bắt đầu từ 1
-    
-    // Các mapping để lưu trữ cược và kết quả của các game
-    mapping(uint256 => Bet[]) public bets;  // Lưu trữ các cược của từng game theo ID (mảng Bet)
-    mapping(uint256 => uint8) public results; // Lưu trữ kết quả của từng game
-    mapping(uint256 => address[]) public playerList;  // Lưu trữ danh sách người chơi cho mỗi game
+    address public owner;
+    uint256 public currentIDgame = 1;
 
-    // Sự kiện khi người chơi đặt cược và khi kết quả được tạo ra
+    uint256 public maxBetAmount = 1 ether;
+
+    mapping(uint256 => Bet[]) public bets;
+    mapping(uint256 => uint8) public results;
+    mapping(uint256 => address[]) public playerList;
+
     event BetPlaced(address indexed player, uint256 amount, uint8 betType, uint256 betValue);
     event ResultGenerated(uint256 gameID, uint8 result);
+    event WinningsDistributed(address indexed player, uint256 amount, address _owner);
 
-    // Modifier chỉ cho phép chủ sở hữu thực thi
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Only the owner can set result");
-        _;
+   modifier onlyOwner() {
+        require(msg.sender == owner, "Only the owner can perform this action.");
+    _   ;
     }
 
-    // Constructor khởi tạo contract BetManager với PlayerManager
-    constructor(address payable _playerManager) {
+  constructor(address payable _playerManager) {
         playerManager = PlayerManager(_playerManager);
-        owner = msg.sender;
+        owner=msg.sender;
     }
 
-    // Hàm đặt cược
     function placeBet(uint8 betType, uint256 betValue, uint256 betAmount) external {
-        // Kiểm tra nếu người chơi đã đăng ký
-        bool isRegistered = playerManager.checkIsRegistered(msg.sender);
-        require(isRegistered, "Player is not registered.");
+        require(betAmount > 0 && betAmount <= maxBetAmount, "Invalid bet amount.");
 
-        // Kiểm tra số tiền cược phải lớn hơn 0
-        require(betAmount > 0, "Bet amount must be greater than zero.");
-
-        // Kiểm tra tính hợp lệ của lựa chọn (betValue) tùy theo betType
-        if (betType == 1) {  // Cược chẵn/lẻ
-            require(betValue == 1 || betValue == 2, "Invalid choice. Choose 1 for Odd or 2 for Even.");
-        } else if (betType == 2) {  // Cược màu đỏ/đen
-            require(betValue == 1 || betValue == 2, "Invalid choice. Choose 1 for Red or 2 for Black.");
-        } else if (betType == 3) {  // Cược 1st12, 2nd12, 3rd12
-            require(betValue >= 1 && betValue <= 3, "Invalid choice. Choose between 1, 2, or 3 for 12 sections.");
-        } else if (betType == 4) {  // Cược số
-            require(betValue >= 0 && betValue <= 36, "Invalid number. Choose a number between 0 and 36.");
+        if (betType == 1) {
+            require(betValue == 1 || betValue == 2, "Invalid choice: 1 for Odd, 2 for Even.");
+        } else if (betType == 2) {
+            require(betValue == 1 || betValue == 2, "Invalid choice: 1 for Red, 2 for Black.");
+        } else if (betType == 3) {
+            require(betValue >= 1 && betValue <= 3, "Invalid choice: 1, 2, or 3 for sections.");
+        } else if (betType == 4) {
+            require(betValue >= 0 && betValue <= 36, "Invalid number: 0 to 36.");
+        } else {
+            revert("Invalid bet type.");
         }
 
-
-        // Kiểm tra số dư của người chơi trong PlayerManager trước khi đặt cược
         uint256 playerBalance = playerManager.getBalance(msg.sender);
         require(playerBalance >= betAmount, "Insufficient balance.");
 
-        // Cập nhật thông tin cược của người chơi cho game hiện tại
         bets[currentIDgame].push(Bet({
             player: msg.sender,
             amount: betAmount,
@@ -71,16 +60,69 @@ contract BetManager {
             betValue: betValue
         }));
 
-        // Thêm người chơi vào danh sách của game
-        playerList[currentIDgame].push(msg.sender);
-        
-        // Giảm số dư của người chơi khi đặt cược
-        playerManager.decreaseBalance(msg.sender, betAmount);
-        // Phát sự kiện BetPlaced
-        emit BetPlaced(msg.sender,betAmount, betType, betValue);
+        if (!isPlayerInGame(currentIDgame, msg.sender)) {
+            playerList[currentIDgame].push(msg.sender);
+        }
+
+        playerManager.decreaseBalance(msg.sender,betAmount);
+        emit BetPlaced(msg.sender, betAmount, betType, betValue);
     }
 
-    // Hàm truy vấn thông tin cược của người chơi cho một game cụ thể
+    function isPlayerInGame(uint256 gameID, address player) internal view returns (bool) {
+        address[] memory players = playerList[gameID];
+        for (uint256 i = 0; i < players.length; i++) {
+            if (players[i] == player) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function spinWheel() external onlyOwner {
+        uint8 result = uint8(uint256(keccak256(abi.encodePacked(block.timestamp, block.prevrandao, currentIDgame))) % 37);
+        results[currentIDgame] = result;
+        emit ResultGenerated(currentIDgame, result);
+        distributeWinnings(currentIDgame, result);
+        currentIDgame++;
+    }
+
+    function distributeWinnings(uint256 gameID, uint8 result) internal {
+    Bet[] memory gameBets = bets[gameID];
+
+    for (uint256 i = 0; i < gameBets.length; i++) {
+        Bet memory bet = gameBets[i];
+        uint256 winnings = 0;
+
+        // Tính toán tiền thưởng tùy theo loại cược và kết quả
+        if (bet.betType == 4 && bet.betValue == result) {
+            winnings = bet.amount * 36;
+        } else if (bet.betType == 1 && ((result % 2 == 0 && bet.betValue == 2) || (result % 2 != 0 && bet.betValue == 1))) {
+            winnings = bet.amount * 2;
+        } else if (bet.betType == 2 && ((isRed(result) && bet.betValue == 1) || (!isRed(result) && bet.betValue == 2))) {
+            winnings = bet.amount * 2;
+        } else if (bet.betType == 3 && ((result >= 1 && result <= 12 && bet.betValue == 1) || (result >= 13 && result <= 24 && bet.betValue == 2) || (result >= 25 && result <= 36 && bet.betValue == 3))) {
+            winnings = bet.amount * 3;
+        }
+
+        // Nếu có tiền thưởng, cập nhật số dư cho người chơi trong PlayerManager
+        if (winnings > 0) {
+            playerManager.updateProfit(bet.player, winnings, msg.sender);  // Cập nhật số dư cho người chơi
+            emit WinningsDistributed(bet.player, winnings, msg.sender);  // Emit sự kiện phân phối tiền thưởng
+        }
+    }
+}
+
+
+    function isRed(uint8 number) internal pure returns (bool) {
+        uint8[18] memory redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+        for (uint8 i = 0; i < redNumbers.length; i++) {
+            if (redNumbers[i] == number) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     function getBetInfo(uint256 gameID, address player) external view returns (uint256 amount, uint8 betType, uint256 betValue) {
         Bet[] memory gameBets = bets[gameID];
         for (uint256 i = 0; i < gameBets.length; i++) {
@@ -91,28 +133,7 @@ contract BetManager {
         revert("Bet not found for the player in this game.");
     }
 
-    // Hàm getter trả về các cược của một game cụ thể
-    function getBets(uint256 gameID) external view returns (Bet[] memory) {
-        return bets[gameID];
-    }
-
-    // Hàm getter trả về danh sách người chơi của một game
     function getPlayers(uint256 gameID) external view returns (address[] memory) {
         return playerList[gameID];
-    }
-
-    // Hàm quay vòng quay
-    function spinWheel() external onlyOwner {
-        // Kết quả ngẫu nhiên từ 0 đến 36
-        uint8 result = uint8(uint256(keccak256(abi.encodePacked(block.timestamp, block.prevrandao, currentIDgame))) % 37);
-        
-        // Lưu trữ kết quả
-        results[currentIDgame] = result;
-
-        // Phát sự kiện ResultGenerated
-        emit ResultGenerated(currentIDgame, result);
-
-        // Tăng ID game cho vòng quay tiếp theo
-        currentIDgame++;
     }
 }
