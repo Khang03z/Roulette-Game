@@ -14,7 +14,6 @@ contract BetManager {
     PlayerManager public playerManager;
     address public owner;
     uint256 public currentIDgame = 1;
-
     uint256 public maxBetAmount = 1 ether;
 
     mapping(uint256 => Bet[]) public bets;
@@ -23,32 +22,32 @@ contract BetManager {
 
     event BetPlaced(address indexed player, uint256 amount, uint8 betType, uint256 betValue);
     event ResultGenerated(uint256 gameID, uint8 result);
-    event WinningsDistributed(address indexed player, uint256 amount, address _owner);
+    event WinningsDistributed(address indexed player, uint256 amount);
 
-   modifier onlyOwner() {
+    modifier onlyOwner() {
         require(msg.sender == owner, "Only the owner can perform this action.");
-    _   ;
+        _;
     }
 
-  constructor(address payable _playerManager) {
+    modifier onlyBetManagerOrOwner() {
+        require(msg.sender == owner || msg.sender == address(this), "Only BetManager or owner can perform this action.");
+        _;
+    }
+
+    constructor(address payable _playerManager) {
         playerManager = PlayerManager(_playerManager);
-        owner=msg.sender;
+        owner = msg.sender;
+    }
+
+    function decreaseBalance(address player, uint256 amount) external onlyBetManagerOrOwner {
+        uint256 playerBalance = playerManager.getBalance(player);
+        require(playerBalance >= amount, "Insufficient balance.");
+        playerManager.decreaseBalance(player, amount);
     }
 
     function placeBet(uint8 betType, uint256 betValue, uint256 betAmount) external {
         require(betAmount > 0 && betAmount <= maxBetAmount, "Invalid bet amount.");
-
-        if (betType == 1) {
-            require(betValue == 1 || betValue == 2, "Invalid choice: 1 for Odd, 2 for Even.");
-        } else if (betType == 2) {
-            require(betValue == 1 || betValue == 2, "Invalid choice: 1 for Red, 2 for Black.");
-        } else if (betType == 3) {
-            require(betValue >= 1 && betValue <= 3, "Invalid choice: 1, 2, or 3 for sections.");
-        } else if (betType == 4) {
-            require(betValue >= 0 && betValue <= 36, "Invalid number: 0 to 36.");
-        } else {
-            revert("Invalid bet type.");
-        }
+        validateBetTypeAndValue(betType, betValue);
 
         uint256 playerBalance = playerManager.getBalance(msg.sender);
         require(playerBalance >= betAmount, "Insufficient balance.");
@@ -64,8 +63,22 @@ contract BetManager {
             playerList[currentIDgame].push(msg.sender);
         }
 
-        playerManager.decreaseBalance(msg.sender,betAmount);
+        playerManager.decreaseBalance(msg.sender, betAmount);
         emit BetPlaced(msg.sender, betAmount, betType, betValue);
+    }
+
+    function validateBetTypeAndValue(uint8 betType, uint256 betValue) internal pure {
+        if (betType == 1) {
+            require(betValue == 1 || betValue == 2, "Invalid choice: 1 for Odd, 2 for Even.");
+        } else if (betType == 2) {
+            require(betValue == 1 || betValue == 2, "Invalid choice: 1 for Red, 2 for Black.");
+        } else if (betType == 3) {
+            require(betValue >= 1 && betValue <= 3, "Invalid choice: 1, 2, or 3 for sections.");
+        } else if (betType == 4) {
+            require(betValue >= 0 && betValue <= 36, "Invalid number: 0 to 36.");
+        } else {
+            revert("Invalid bet type.");
+        }
     }
 
     function isPlayerInGame(uint256 gameID, address player) internal view returns (bool) {
@@ -87,13 +100,22 @@ contract BetManager {
     }
 
     function distributeWinnings(uint256 gameID, uint8 result) internal {
-    Bet[] memory gameBets = bets[gameID];
+        Bet[] memory gameBets = bets[gameID];
 
-    for (uint256 i = 0; i < gameBets.length; i++) {
-        Bet memory bet = gameBets[i];
+        for (uint256 i = 0; i < gameBets.length; i++) {
+            Bet memory bet = gameBets[i];
+            uint256 winnings = calculateWinnings(bet, result);
+
+            if (winnings > 0) {
+                playerManager.updateProfit(bet.player, winnings);
+                emit WinningsDistributed(bet.player, winnings);
+            }
+        }
+    }
+
+    function calculateWinnings(Bet memory bet, uint8 result) internal pure returns (uint256) {
         uint256 winnings = 0;
 
-        // Tính toán tiền thưởng tùy theo loại cược và kết quả
         if (bet.betType == 4 && bet.betValue == result) {
             winnings = bet.amount * 36;
         } else if (bet.betType == 1 && ((result % 2 == 0 && bet.betValue == 2) || (result % 2 != 0 && bet.betValue == 1))) {
@@ -104,14 +126,8 @@ contract BetManager {
             winnings = bet.amount * 3;
         }
 
-        // Nếu có tiền thưởng, cập nhật số dư cho người chơi trong PlayerManager
-        if (winnings > 0) {
-            playerManager.updateProfit(bet.player, winnings, msg.sender);  // Cập nhật số dư cho người chơi
-            emit WinningsDistributed(bet.player, winnings, msg.sender);  // Emit sự kiện phân phối tiền thưởng
-        }
+        return winnings;
     }
-}
-
 
     function isRed(uint8 number) internal pure returns (bool) {
         uint8[18] memory redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];

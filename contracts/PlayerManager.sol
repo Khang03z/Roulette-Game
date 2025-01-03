@@ -10,6 +10,7 @@ contract PlayerManager {
 
     address public owner;
     mapping(address => Player) public players;
+    mapping(address => bool) public authorizedAddresses;
 
     event PlayerRegistered(address indexed playerAddress);
     event BalanceUpdated(address indexed playerAddress, uint256 newBalance);
@@ -21,8 +22,17 @@ contract PlayerManager {
         _;
     }
 
+    modifier onlyAuthorized() {
+        require(authorizedAddresses[msg.sender] || msg.sender == owner, "Not authorized");
+        _;
+    }
+
     constructor() {
         owner = msg.sender;
+    }
+
+    function addAuthorizedAddress(address _address) external onlyOwner {
+        authorizedAddresses[_address] = true;
     }
 
     function registerPlayer() external {
@@ -37,8 +47,7 @@ contract PlayerManager {
         emit BalanceUpdated(msg.sender, players[msg.sender].balance);
     }
 
-    function updateProfit(address player, uint256 amount, address _check) external  {
-        require(_check == owner,"Only owner can Update profit");
+    function updateProfit(address player, uint256 amount) external onlyAuthorized {
         require(players[player].isRegistered, "Player is not registered.");
         players[player].balance += amount;
         emit BalanceUpdated(player, players[player].balance);
@@ -49,12 +58,12 @@ contract PlayerManager {
         return players[player].balance;
     }
 
-    function decreaseBalance(address player, uint256 amount) external {
-    require(players[player].isRegistered, "Player is not registered.");
-    require(players[player].balance >= amount, "Insufficient balance.");
-    players[player].balance -= amount;
-    emit BalanceUpdated(player, players[player].balance);
-}
+    function decreaseBalance(address player, uint256 amount) external onlyAuthorized {
+        require(players[player].isRegistered, "Player is not registered.");
+        require(players[player].balance >= amount, "Insufficient balance.");
+        players[player].balance -= amount;
+        emit BalanceUpdated(player, players[player].balance);
+    }
 
     function withdrawBalance(uint256 amount) external {
         require(players[msg.sender].isRegistered, "Player is not registered.");
