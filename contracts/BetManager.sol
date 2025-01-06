@@ -39,17 +39,13 @@ contract BetManager {
         owner = msg.sender;
     }
 
-    function decreaseBalance(address player, uint256 amount) external onlyBetManagerOrOwner {
-        uint256 playerBalance = playerManager.getBalance(player);
-        require(playerBalance >= amount, "Insufficient balance.");
-        playerManager.decreaseBalance(player, amount);
-    }
-
     function placeBet(uint8 betType, uint256 betValue, uint256 betAmount) external {
+        uint256 playerBalance = playerManager.getBalance(msg.sender);
+        require(playerBalance>0,"Need at least 0.0001 ETH to play game");
         require(betAmount > 0 && betAmount <= maxBetAmount, "Invalid bet amount.");
         validateBetTypeAndValue(betType, betValue);
 
-        uint256 playerBalance = playerManager.getBalance(msg.sender);
+        
         require(playerBalance >= betAmount, "Insufficient balance.");
 
         bets[currentIDgame].push(Bet({

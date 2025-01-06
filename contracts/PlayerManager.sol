@@ -8,6 +8,7 @@ contract PlayerManager {
         bool isRegistered;
     }
 
+
     address public owner;
     mapping(address => Player) public players;
     mapping(address => bool) public authorizedAddresses;
@@ -16,7 +17,7 @@ contract PlayerManager {
     event BalanceUpdated(address indexed playerAddress, uint256 newBalance);
     event Withdraw(address indexed player, uint256 amount);
     event Received(address indexed sender, uint256 amount);
-
+    
     modifier onlyOwner() {
         require(msg.sender == owner, "Only the owner can call this function.");
         _;
@@ -43,9 +44,11 @@ contract PlayerManager {
 
     function deposit() external payable {
         require(players[msg.sender].isRegistered, "Player is not registered.");
+        require(msg.value > 0, "Must deposit a positive amount.");
         players[msg.sender].balance += msg.value;
         emit BalanceUpdated(msg.sender, players[msg.sender].balance);
     }
+
 
     function updateProfit(address player, uint256 amount) external onlyAuthorized {
         require(players[player].isRegistered, "Player is not registered.");
@@ -66,16 +69,21 @@ contract PlayerManager {
     }
 
     function withdrawBalance(uint256 amount) external {
-        require(players[msg.sender].isRegistered, "Player is not registered.");
-        require(amount > 0, "Amount must be greater than 0.");
-        require(players[msg.sender].balance >= amount, "Insufficient balance.");
+    require(players[msg.sender].isRegistered, "Player is not registered.");
+    require(amount > 0, "Amount must be greater than 0.");
+    require(players[msg.sender].balance >= amount, "Insufficient balance.");
 
-        players[msg.sender].balance -= amount;
+    players[msg.sender].balance -= amount;
+    emit BalanceUpdated(msg.sender, players[msg.sender].balance);
 
-        (bool success, ) = payable(msg.sender).call{value: amount}("");
-        require(success, "Transfer failed.");
+    (bool success, ) = payable(msg.sender).call{value: amount}("");
+    require(success, "Transfer failed.");
+}
 
-        emit BalanceUpdated(msg.sender, players[msg.sender].balance);
+
+    function getTotalBalance() public view returns(uint256)
+    {
+        return address(this).balance;
     }
 
     receive() external payable {
